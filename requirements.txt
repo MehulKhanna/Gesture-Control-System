@@ -1,0 +1,6 @@
+numpy
+plotly
+tk-tools
+mediapipe
+customtkinter
+opencv-python
