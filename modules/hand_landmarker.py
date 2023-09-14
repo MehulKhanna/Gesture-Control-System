@@ -6,7 +6,7 @@ import cv2 as opencv
 from numpy import ndarray
 from typing import List, NamedTuple, Tuple, TypedDict
 
-from mediapipe.framework.formats.classification_pb2 import ClassificationList
+import mediapipe.framework.formats.classification_pb2
 from mediapipe.framework.formats.landmark_pb2 import (
     NormalizedLandmarkList,
     LandmarkList,
@@ -21,7 +21,7 @@ import plotly.graph_objects as go
 class Results(NamedTuple):
     multi_hand_landmarks: List[NormalizedLandmarkList]
     multi_hand_world_landmarks: List[LandmarkList]
-    multi_handedness: List[ClassificationList]
+    multi_handedness: List[mediapipe.framework.formats.classification_pb2.ClassificationList]
 
 
 class GestureData(TypedDict):
@@ -32,22 +32,23 @@ class GestureData(TypedDict):
     Graph: go.Figure
 
 
+# noinspection PyTypeChecker
 class HandLandmarker:
     def __init__(self, static_image_mode: bool = False, max_num_hands: int = 2) -> None:
         self.hand_landmarker = hands.Hands(static_image_mode, max_num_hands)
 
-    def process(self, image: ndarray) -> Results:
+    def process(self, image: ndarray) -> NamedTuple:
         return self.hand_landmarker.process(image)
 
+    @staticmethod
     def draw_landmarks(
-        self,
-        image: ndarray,
-        results: Results,
-        landmark_radius: int = 2,
-        landmark_thickness: int = 3,
-        connection_thickness: int = 3,
-        connection_color: Tuple[int, int, int] = (255, 255, 255),
-        landmark_color: Tuple[int, int, int] = (255, 255, 0),
+            image: ndarray,
+            results: Results,
+            landmark_radius: int = 2,
+            landmark_thickness: int = 3,
+            connection_thickness: int = 3,
+            connection_color: Tuple[int, int, int] = (255, 255, 255),
+            landmark_color: Tuple[int, int, int] = (255, 255, 0),
     ) -> None:
         for hand_landmarks in results.multi_hand_landmarks:
             drawing_utils.draw_landmarks(
@@ -59,15 +60,15 @@ class HandLandmarker:
             )
 
     def register_hand_gesture(
-        self,
-        name: str,
-        frames: int = 150,
-        font_scale: int = 2,
-        wait_frames: int = 150,
-        font_thickness: int = 3,
-        font_style: int = opencv.FONT_HERSHEY_DUPLEX,
-        font_color: Tuple[int, int, int] = (255, 255, 0),
-    ) -> bool:
+            self,
+            name: str,
+            frames: int = 150,
+            font_scale: int = 2,
+            wait_frames: int = 150,
+            font_thickness: int = 3,
+            font_style: int = opencv.FONT_HERSHEY_DUPLEX,
+            font_color: Tuple[int, int, int] = (255, 255, 0),
+    ):
         video = opencv.VideoCapture(0)
 
         landmark_results: List[List[LandmarkList]] = []
@@ -111,7 +112,7 @@ class HandLandmarker:
 
                 continue
 
-            results: Results = self.process(
+            results: NamedTuple = self.process(
                 opencv.cvtColor(image, opencv.COLOR_BGR2RGB)
             )
 
@@ -162,7 +163,7 @@ class HandLandmarker:
             image = np.zeros((480, 640, 3), np.uint8)
             image[:, :] = (11051 // 256, 11051 // 256, 11051 // 256)
 
-            if result.multi_hand_landmarks != None:
+            if result.multi_hand_landmarks is not None:
                 self.draw_landmarks(image, result, landmark_color=(0, 255, 255))
                 images.append(image)
 
@@ -184,7 +185,7 @@ class HandLandmarker:
                         colorscale="Viridis",
                         opacity=0.8,
                     ),
-                    name=f"Frame {index+1}",
+                    name=f"Frame {index + 1}",
                 )
             )
 

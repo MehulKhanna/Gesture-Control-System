@@ -1,5 +1,7 @@
 import os
 import pickle
+from typing import Optional
+
 import cv2 as opencv
 from PIL import Image
 import customtkinter as ctk
@@ -20,6 +22,8 @@ class SideBar(ctk.CTkScrollableFrame):
             label_fg_color="#333333",
             **kwargs,
         )
+        if gesture is None:
+            gesture = gesture
         self.pack_propagate(False)
         self.columnconfigure(0, weight=1)
 
@@ -32,7 +36,7 @@ class SideBar(ctk.CTkScrollableFrame):
                 bg_color="transparent",
                 fg_color="#333333",
                 hover_color="#373737",
-                command=lambda gesture=gesture: self.gesture_button(gesture),
+                command=lambda gesture=None: self.gesture_button(gesture),
             )
             for gesture in gesture_recognition.gestures
         ]
@@ -42,7 +46,8 @@ class SideBar(ctk.CTkScrollableFrame):
             for index, button in enumerate(self.gesture_buttons)
         ]
 
-    def gesture_button(self, gesture: GestureData) -> None:
+    @staticmethod
+    def gesture_button(gesture: GestureData) -> None:
         app.main_view = GestureView(app, gesture)
         app.main_view.grid(column=1, row=0, sticky="news", padx=10, pady=10)
 
@@ -76,7 +81,7 @@ class BottomBar(ctk.CTkFrame):
         self.pack_propagate(False)
         self.thread = None
         self.register_popup = None
-        self.video: opencv.VideoCapture = None
+        self.video: Optional[opencv.VideoCapture] = None
 
         self.register_button = ctk.CTkButton(
             self,
@@ -120,11 +125,13 @@ class BottomBar(ctk.CTkFrame):
         self.copyright_label.pack(side="left", padx=(10, 20))
         self.home_button.pack(side="right", padx=(10, 20))
 
-    def home(self) -> None:
+    @staticmethod
+    def home() -> None:
         app.main_view = MainView(app)
         app.main_view.grid(column=1, row=0, sticky="news", padx=10, pady=10)
 
-    def start_recognition(self) -> None:
+    @staticmethod
+    def start_recognition() -> None:
         gesture_recognition.start()
 
     def register_gesture(self) -> None:
@@ -136,7 +143,7 @@ class BottomBar(ctk.CTkFrame):
     class RegisterGesturePopUp(ctk.CTkToplevel):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.title("Gesture Registeration Options")
+            self.title("Gesture Registration Options")
             self.geometry("500x300")
 
             self.columnconfigure(0, weight=1)
@@ -175,7 +182,7 @@ class BottomBar(ctk.CTkFrame):
 
             self.frames_label = ctk.CTkLabel(
                 self.options_frame,
-                text="Adjust the slider below to change the registeration frame length :-",
+                text="Adjust the slider below to change the registration frame length :-",
                 font=("Century", 12),
             )
 
@@ -337,7 +344,7 @@ class GestureOptions(ctk.CTkFrame):
         )
 
         input_ = input_dialog.get_input()
-        if input_ == None:
+        if input_ is None:
             return
 
         gesture_data: GestureData = GestureData(
@@ -441,7 +448,7 @@ class App(ctk.CTk):
         )
 
         self.scaling_label.pack()
-        self.scaling_optionemenu = ctk.CTkOptionMenu(
+        self.scaling_optionmenu = ctk.CTkOptionMenu(
             self.bottom_left_frame,
             values=["100%", "110%", "120%", "130%", "140%"],
             command=self.change_scaling_event,
@@ -450,10 +457,11 @@ class App(ctk.CTk):
             button_hover_color="#373737",
         )
 
-        self.scaling_optionemenu.pack(pady=(0, 5))
+        self.scaling_optionmenu.pack(pady=(0, 5))
         self.bottom_left_frame.grid(row=1, column=0, sticky="news")
 
-    def change_scaling_event(self, new_scaling: str):
+    @staticmethod
+    def change_scaling_event(new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 

@@ -1,6 +1,7 @@
-numpy
-plotly
+numpy~=1.24.4
+plotly~=5.16.1
 tk-tools
-mediapipe
-customtkinter
-opencv-python
+mediapipe~=0.10.3
+customtkinter~=5.2.0
+opencv-python~=4.8.0.76
+Pillow~=10.0.0
