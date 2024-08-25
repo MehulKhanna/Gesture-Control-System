@@ -6,23 +6,10 @@ import cv2 as opencv
 from numpy import ndarray
 from typing import List, NamedTuple, Tuple, TypedDict
 
-import mediapipe.framework.formats.classification_pb2
-from mediapipe.framework.formats.landmark_pb2 import (
-    NormalizedLandmarkList,
-    LandmarkList,
-)
-
 from mediapipe.python.solutions import hands, drawing_utils
 from mediapipe.python.solutions.drawing_styles import DrawingSpec
 
 import plotly.graph_objects as go
-
-
-class Results(NamedTuple):
-    multi_hand_landmarks: List[NormalizedLandmarkList]
-    multi_hand_world_landmarks: List[LandmarkList]
-    multi_handedness: List[mediapipe.framework.formats.classification_pb2.ClassificationList]
-
 
 class GestureData(TypedDict):
     GestureName: str
@@ -43,7 +30,7 @@ class HandLandmarker:
     @staticmethod
     def draw_landmarks(
             image: ndarray,
-            results: Results,
+            results,
             landmark_radius: int = 2,
             landmark_thickness: int = 3,
             connection_thickness: int = 3,
@@ -71,8 +58,8 @@ class HandLandmarker:
     ):
         video = opencv.VideoCapture(0)
 
-        landmark_results: List[List[LandmarkList]] = []
-        results_list: List[Results] = []
+        landmark_results = []
+        results_list = []
         starting_frames = frames
 
         while video.isOpened():

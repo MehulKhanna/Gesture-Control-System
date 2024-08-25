@@ -22,52 +22,52 @@ class SideBar(ctk.CTkScrollableFrame):
             label_fg_color="#333333",
             **kwargs,
         )
-        if gesture is None:
-            gesture = gesture
+        self.master = master
         self.pack_propagate(False)
         self.columnconfigure(0, weight=1)
 
-        self.gesture_buttons = [
-            ctk.CTkButton(
-                self,
-                text=gesture["GestureName"],
-                font=("Century", 14),
-                height=40,
-                bg_color="transparent",
-                fg_color="#333333",
-                hover_color="#373737",
-                command=lambda gesture=None: self.gesture_button(gesture),
+        self.gesture_buttons = []
+        for gesture in gesture_recognition.gestures:
+            self.gesture_buttons.append(
+                ctk.CTkButton(
+                    self,
+                    text=gesture["GestureName"],
+                    font=("Century", 14),
+                    height=40,
+                    bg_color="transparent",
+                    fg_color="#333333",
+                    hover_color="#373737",
+                    command=lambda g=gesture: self.gesture_button(g),
+                )
             )
-            for gesture in gesture_recognition.gestures
-        ]
 
         [
             button.grid(row=index, column=0, sticky="wes", padx=(0, 2), pady=5)
             for index, button in enumerate(self.gesture_buttons)
         ]
 
-    @staticmethod
-    def gesture_button(gesture: GestureData) -> None:
-        app.main_view = GestureView(app, gesture)
-        app.main_view.grid(column=1, row=0, sticky="news", padx=10, pady=10)
+    def gesture_button(self, gesture: GestureData) -> None:
+        self.master.main_view = GestureView(self.master, gesture)
+        self.master.main_view.grid(column=1, row=0, sticky="news", padx=10, pady=10)
 
     def reload_scrollbar(self) -> None:
         gesture_recognition.reload_gestures()
         [button.destroy() for button in self.gesture_buttons]
 
-        self.gesture_buttons = [
-            ctk.CTkButton(
-                self,
-                text=gesture["GestureName"],
-                font=("Century", 14),
-                height=40,
-                bg_color="transparent",
-                fg_color="#333333",
-                hover_color="#373737",
-                command=lambda gesture=gesture: self.gesture_button(gesture),
+        self.gesture_buttons = []
+        for gesture in gesture_recognition.gestures:
+            self.gesture_buttons.append(
+                ctk.CTkButton(
+                    self,
+                    text=gesture["GestureName"],
+                    font=("Century", 14),
+                    height=40,
+                    bg_color="transparent",
+                    fg_color="#333333",
+                    hover_color="#373737",
+                    command=lambda g=gesture: self.gesture_button(g),
+                )
             )
-            for gesture in gesture_recognition.gestures
-        ]
 
         [
             button.grid(row=index, column=0, sticky="wes", padx=(0, 2), pady=5)
@@ -268,6 +268,7 @@ class GestureOptions(ctk.CTkFrame):
         super().__init__(master, **kwargs)
         self.pack_propagate(False)
         self.gesture = gesture
+        self.master = master
 
         self.gesture_name = ctk.CTkLabel(
             self,
@@ -330,10 +331,9 @@ class GestureOptions(ctk.CTkFrame):
 
     def delete(self) -> None:
         os.remove(f"landmarks/{self.gesture['GestureName']}.pkl")
-        app.sidebar.reload_scrollbar()
-
-        app.main_view = MainView(app)
-        app.main_view.grid(column=1, row=0, sticky="news", padx=10, pady=10)
+        self.master.master.sidebar.reload_scrollbar()
+        self.master.master.main_view = MainView(app)
+        self.master.master.main_view.grid(column=1, row=0, sticky="news", padx=10, pady=10)
 
     def rename(self) -> None:
         input_dialog = ctk.CTkInputDialog(
@@ -407,6 +407,7 @@ class GestureView(ctk.CTkFrame):
         super().__init__(
             master, bg_color="transparent", fg_color="transparent", *args, **kwargs
         )
+        self.master = master
         self.pack_propagate(False)
 
         self.columnconfigure(0, weight=1)
@@ -465,6 +466,6 @@ class App(ctk.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 
-
-app = App()
-app.mainloop()
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()

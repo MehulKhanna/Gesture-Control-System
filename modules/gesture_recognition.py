@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 import cv2 as opencv
 from typing import List, Tuple
-from modules.hand_landmarker import HandLandmarker, GestureData, Results, GestureData
+from modules.hand_landmarker import HandLandmarker, GestureData
 
 
 class GestureRecognition:
@@ -47,7 +47,7 @@ class GestureRecognition:
             if not success:
                 break
 
-            results: Results = self.hand_landmarker.process(
+            results = self.hand_landmarker.process(
                 opencv.cvtColor(image, opencv.COLOR_BGR2RGB)
             )
 
@@ -82,7 +82,7 @@ class GestureRecognition:
                 for gesture in self.gestures
             ]
 
-            if euclidean_distances == []:
+            if not euclidean_distances:
                 self.hand_landmarker.draw_landmarks(image, results)
                 opencv.imshow("Gesture Recognition", image)
                 if opencv.waitKey(1) & 0xFF == ord("q"):
@@ -91,7 +91,7 @@ class GestureRecognition:
                 continue
 
             filtered = list(filter(lambda x: x[1], euclidean_distances))
-            if filtered == []:
+            if not filtered:
                 self.hand_landmarker.draw_landmarks(image, results)
                 opencv.imshow("Gesture Recognition", image)
                 if opencv.waitKey(1) & 0xFF == ord("q"):
